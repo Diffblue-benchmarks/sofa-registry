@@ -1,0 +1,391 @@
+buildCmd: mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+#Target TGF: 137.95
+# - methods: 12
+# - complexity: 556
+# - construction: 12.0
+# - dependency: 3.85
+  - target:
+    - dir: server/common/util/target/classes
+      file: com/alipay/sofa/registry/util/FileUtils.class
+      sourceDir: server/common/util/src/main/java
+      sourceFile: com/alipay/sofa/registry/util/FileUtils.java
+#Target TGF: 146.666666667
+# - methods: 36
+# - complexity: 214
+# - construction: 12.0
+# - dependency: 10.1666666667
+  - target:
+    - dir: server/common/model/target/classes
+      file: com/alipay/sofa/registry/common/model/store/BaseInfo.class
+      sourceDir: server/common/model/src/main/java
+      sourceFile: com/alipay/sofa/registry/common/model/store/BaseInfo.java
+#Target TGF: 154.766666667
+# - methods: 16
+# - complexity: 316
+# - construction: 5.53333333333
+# - dependency: 5.0
+  - target:
+    - dir: server/common/model/target/classes
+      file: com/alipay/sofa/registry/common/model/metaserver/DataNode.class
+      sourceDir: server/common/model/src/main/java
+      sourceFile: com/alipay/sofa/registry/common/model/metaserver/DataNode.java
+#Target TGF: 301.75
+# - methods: 128
+# - complexity: 465
+# - construction: 63.3333333333
+# - dependency: 59.2
+  - target:
+    - dir: server/server/session/target/classes
+      file: com/alipay/sofa/registry/server/session/bootstrap/SessionServerConfigBean.class
+      sourceDir: server/server/session/src/main/java
+      sourceFile: com/alipay/sofa/registry/server/session/bootstrap/SessionServerConfigBean.java
+#Target TGF: 126.541666667
+# - methods: 58
+# - complexity: 211
+# - construction: 29.3333333333
+# - dependency: 28.625
+  - target:
+    - dir: server/server/data/target/classes
+      file: com/alipay/sofa/registry/server/data/bootstrap/DataServerConfig.class
+      sourceDir: server/server/data/src/main/java
+      sourceFile: com/alipay/sofa/registry/server/data/bootstrap/DataServerConfig.java
+#Target TGF: 179.65
+# - methods: 36
+# - complexity: 921
+# - construction: 9.86666666667
+# - dependency: 3.98333333333
+  - target:
+    - dir: server/server/meta/target/classes
+      file: com/alipay/sofa/registry/server/meta/store/DataStoreService.class
+      sourceDir: server/server/meta/src/main/java
+      sourceFile: com/alipay/sofa/registry/server/meta/store/DataStoreService.java
+#Target TGF: 142.933333333
+# - methods: 31
+# - complexity: 659
+# - construction: 8.86666666667
+# - dependency: 4.70952380952
+  - target:
+    - dir: server/server/meta/target/classes
+      file: com/alipay/sofa/registry/server/meta/store/SessionStoreService.class
+      sourceDir: server/server/meta/src/main/java
+      sourceFile: com/alipay/sofa/registry/server/meta/store/SessionStoreService.java
+#Target TGF: 328.388888889
+# - methods: 38
+# - complexity: 687
+# - construction: 34.1666666667
+# - dependency: 17.0
+  - target:
+    - dir: server/common/util/target/classes
+      file: com/alipay/sofa/registry/log/SLF4JLogger.class
+      sourceDir: server/common/util/src/main/java
+      sourceFile: com/alipay/sofa/registry/log/SLF4JLogger.java
+#Target TGF: 134.062962963
+# - methods: 22
+# - complexity: 643
+# - construction: 12.8666666667
+# - dependency: 7.09444444444
+  - target:
+    - dir: server/server/data/target/classes
+      file: com/alipay/sofa/registry/server/data/cache/DataServerCache.class
+      sourceDir: server/server/data/src/main/java
+      sourceFile: com/alipay/sofa/registry/server/data/cache/DataServerCache.java
+#Target TGF: 260.0
+# - methods: 28
+# - complexity: 472
+# - construction: 16.0
+# - dependency: 14.0
+  - target:
+    - dir: client/impl/target/classes
+      file: com/alipay/sofa/registry/client/provider/DefaultRegistryClientConfig.class
+      sourceDir: client/impl/src/main/java
+      sourceFile: com/alipay/sofa/registry/client/provider/DefaultRegistryClientConfig.java
+dependenciesOnClasspath:
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/meta/store/SessionStoreService.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/common/model/metaserver/SessionNode.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/common/model/store/BaseInfo.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/common/model/metaserver/DataOperator.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/meta/store/StoreService.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/log/LoggerFactory.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/meta/store/DataStoreService.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/session/bootstrap/SessionServerConfig.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/task/listener/TaskListenerManager.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/meta/bootstrap/NodeConfig.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/common/model/metaserver/NodeChangeResult.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/task/listener/TaskEvent.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/common/model/store/URL.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/common/model/metaserver/GetChangeListRequest.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/meta/repository/VersionRepositoryService.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/meta/store/RenewDecorate.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/common/model/store/StoreData.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/common/model/store/StoreData$DataType.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/util/FileUtils.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/session/bootstrap/CommonConfig.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/net/NetUtil.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/log/SLF4JLogger.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/common/model/metaserver/DataNode.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/common/model/Node$NodeStatus.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/data/node/DataNodeStatus.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/meta/node/NodeOperator.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/common/model/metaserver/DataCenterNodes.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/data/cache/BackupTriad.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/meta/repository/NodeRepository.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/meta/node/MetaNodeService.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/data/bootstrap/DataServerConfig.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/common/model/store/WordCache.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/data/cache/DataServerCache.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/log/Logger.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/common/model/Node.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/meta/bootstrap/ServiceFactory.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/data/bootstrap/CommonConfig.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/meta/repository/NodeConfirmStatusService.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/consistency/hash/HashNode.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/client/api/RegistryClientConfig.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/session/bootstrap/SessionServerConfigBean.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/data/cache/DataServerChangeItem.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/consistency/hash/ConsistentHash.class
+-
+  source: classes
+  classFile: com/alipay/sofa/registry/server/meta/repository/RepositoryService.class
